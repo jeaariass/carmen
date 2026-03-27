@@ -27,7 +27,12 @@
 
       <!-- Logo -->
       <div class="logo">
-        <div class="logo-icon"><i class="fas fa-globe-americas"></i></div>
+        <img src="brand/logo-alcaldia.png" alt="Alcaldía"
+            style="height:36px;width:auto;object-fit:contain;border-radius:6px"
+            onerror="this.style.display='none'">
+        <img src="brand/logo-ctglobal.png" alt="CTGlobal"
+            style="height:30px;width:auto;object-fit:contain;opacity:.85"
+            onerror="this.style.display='none'">
         <div class="logo-text">
           <h2>GeoVisor</h2>
           <p data-project-nombre>Carmen de Apicalá — EOT</p>
@@ -44,13 +49,18 @@
     </div>
 
     <div class="header-right">
+      <!-- Encuestas -->
+      <button id="btnEncuestasOpen" class="btn-icon" title="Encuestas ciudadanas">
+        <i class="fas fa-clipboard-list"></i>
+      </button>
+
       <!-- Repositorio documental -->
       <button id="btnDocRepoOpen" class="btn-icon" title="Repositorio documental">
         <i class="fas fa-folder-open"></i>
       </button>
 
       <!-- Cargar documentos (solo EDITOR) -->
-      <button id="btnDocUploadOpen" class="btn-icon" data-permiso="subirArchivos" title="Cargar documentos">
+      <button id="btnDocUploadOpen" class="btn-icon" data-permiso="subirDocumentos" title="Cargar documentos">
         <i class="fas fa-cloud-upload-alt"></i>
       </button>
 
@@ -113,9 +123,6 @@
         </button>
         <button class="tool-nav-btn" data-panel="coord" data-permiso="capturaCoords">
           <i class="fas fa-crosshairs"></i>Coords
-        </button>
-        <button class="tool-nav-btn" data-panel="street360" data-permiso="verStreet360">
-          <i class="fas fa-street-view"></i>360°
         </button>
       </nav>
 
@@ -228,17 +235,6 @@
           </div>
         </div>
 
-        <!-- STREET 360 -->
-        <div id="panel-street360" class="tool-panel" data-permiso="verStreet360">
-          <p class="panel-title"><i class="fas fa-street-view"></i> Vista 360°</p>
-          <button id="btn-street360" class="btn btn-primary btn-sm">
-            <i class="fas fa-map-pin"></i> Activar puntos 360°
-          </button>
-          <p class="hint-text" style="margin-top:.5rem">
-            Activa la capa y haz clic en un punto azul del mapa para abrir la vista panorámica.
-          </p>
-        </div>
-
       </div><!-- /sidebar-body -->
     </aside>
 
@@ -284,8 +280,9 @@
 
       <!-- Dock capas activas — layers.js usa #zOrderDock y #zOrderList -->
       <div id="zOrderDock">
-        <div class="dock-header">
+        <div class="dock-header" id="zOrderDockHeader" style="cursor:pointer" title="Minimizar/expandir">
           <i class="fas fa-sort-amount-down"></i>&ensp;Capas activas
+          <i class="fas fa-chevron-down" id="zOrderDockChevron" style="margin-left:auto;font-size:.7rem"></i>
         </div>
         <ul id="zOrderList"></ul>
       </div>
@@ -318,13 +315,38 @@
   <button id="s360-close"><i class="fas fa-times"></i></button>
 </div>
 
-<!-- Tab switching + sidebar toggle -->
+<!-- Overlay encuestas — DEBE IR ANTES DEL SCRIPT -->
+<div id="encuestasOverlay" style="
+  position:fixed;inset:0;background:rgba(0,0,0,.48);
+  z-index:10000;display:none;align-items:center;justify-content:center;padding:1rem;">
+  <div style="
+    background:#fff;border-radius:14px;
+    width:min(900px,100%);max-height:92vh;overflow:auto;
+    box-shadow:0 24px 64px rgba(0,0,0,.28);
+    display:flex;flex-direction:column;">
+    <div style="
+      display:flex;justify-content:space-between;align-items:center;
+      padding:.85rem 1.25rem;border-bottom:1px solid #e5e7eb;
+      background:#f9fafb;border-radius:14px 14px 0 0;flex-shrink:0;">
+      <strong style="font-size:.95rem;color:#111827;display:flex;align-items:center;gap:.5rem;">
+        <i class="fas fa-clipboard-list" style="color:#2563eb"></i>
+        Encuestas ciudadanas
+      </strong>
+      <button id="btnEncuestasClose" style="
+        background:none;border:none;font-size:1.1rem;cursor:pointer;
+        color:#6b7280;padding:.2rem .4rem;border-radius:6px;">✕</button>
+    </div>
+    <div id="surveysRoot" style="flex:1;overflow:auto;"></div>
+  </div>
+</div>
+
+<!-- Scripts — todo dentro de DOMContentLoaded para que el DOM esté listo -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // Nav herramientas
-  const navBtns  = document.querySelectorAll('.tool-nav-btn');
-  const panels   = document.querySelectorAll('.tool-panel');
 
+  // ── Nav herramientas ──────────────────────────────────────
+  const navBtns = document.querySelectorAll('.tool-nav-btn');
+  const panels  = document.querySelectorAll('.tool-panel');
   navBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.panel;
@@ -335,19 +357,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Toggle sidebar
+  // ── Toggle sidebar ────────────────────────────────────────
   document.getElementById('btnToggleSidebar')?.addEventListener('click', () => {
     document.getElementById('sidebar')?.classList.toggle('collapsed');
   });
 
-  // Avatar inicial
-  document.addEventListener('DOMContentLoaded', () => {
-    const nombre = localStorage.getItem('ctg_user')
-      ? JSON.parse(localStorage.getItem('ctg_user'))?.nombre || 'U'
-      : 'U';
+  // ── Avatar inicial ────────────────────────────────────────
+  try {
+    const nombre = JSON.parse(localStorage.getItem('ctg_user') || '{}')?.nombre || 'U';
     const el = document.getElementById('userInitials');
     if (el) el.textContent = nombre.charAt(0).toUpperCase();
+  } catch {}
+
+  // ── Minimizar dock capas activas ──────────────────────────
+  document.getElementById('zOrderDockHeader')?.addEventListener('click', () => {
+    const list    = document.getElementById('zOrderList');
+    const chevron = document.getElementById('zOrderDockChevron');
+    const collapsed = list.style.display === 'none';
+    list.style.display = collapsed ? '' : 'none';
+    chevron.className  = collapsed ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
   });
+
+  // ── Encuestas overlay ─────────────────────────────────────
+  const encOverlay = document.getElementById('encuestasOverlay');
+  document.getElementById('btnEncuestasOpen')?.addEventListener('click', () => {
+    encOverlay.style.display = 'flex';
+  });
+  document.getElementById('btnEncuestasClose')?.addEventListener('click', () => {
+    encOverlay.style.display = 'none';
+  });
+  encOverlay?.addEventListener('click', e => {
+    if (e.target === encOverlay) encOverlay.style.display = 'none';
+  });
+
 });
 </script>
 

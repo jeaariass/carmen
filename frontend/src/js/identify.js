@@ -216,7 +216,10 @@ export async function initIdentify(ctx) {
 
   btnToggle.addEventListener('click', () => {
     if (running) {
-      if (singleClickHandler) { map.un('singleclick', singleClickHandler); singleClickHandler = null; }
+      if (singleClickHandler) {
+        ol.Observable.unByKey(singleClickHandler);
+        singleClickHandler = null;
+      }
       setButtonState(false);
     } else {
       stopMeasureIfRunning();
@@ -238,7 +241,7 @@ export async function initIdentify(ctx) {
   });
   eventBus.on('identify:stop', () => {
     if (running) {
-      if (singleClickHandler) map.un('singleclick', singleClickHandler);
+      if (singleClickHandler) ol.Observable.unByKey(singleClickHandler);  // ← correcto
       singleClickHandler = null; setButtonState(false);
     }
   });

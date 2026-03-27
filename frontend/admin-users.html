@@ -41,6 +41,10 @@
     <!-- Resumen por rol -->
     <div class="role-summary" id="roleSummary">
       <div class="rs-card">
+        <span class="rs-count" id="countFuncionario">—</span>
+        <span class="rs-label">FUNCIONARIO</span>
+      </div>
+      <div class="rs-card">
         <span class="rs-count" id="countViewer">—</span>
         <span class="rs-label">VIEWER</span>
       </div>
@@ -100,8 +104,9 @@
         <div class="form-group">
           <label for="uRol">Rol</label>
           <select id="uRol" class="form-input">
-            <option value="VIEWER">VIEWER — Solo consulta</option>
-            <option value="EDITOR">EDITOR — Puede editar y gestionar</option>
+            <option value="VIEWER">VIEWER — Solo consulta básica</option>
+            <option value="FUNCIONARIO">FUNCIONARIO — Herramientas técnicas</option>
+            <option value="EDITOR">EDITOR — Control total + gestión</option>
           </select>
         </div>
         <div class="form-group">

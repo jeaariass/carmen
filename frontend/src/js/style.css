@@ -21,7 +21,7 @@
   --shadow-md:  0 4px 6px -1px rgba(0,0,0,.1);
   --shadow-lg:  0 10px 15px -3px rgba(0,0,0,.1);
   --sidebar-w:  370px;
-  --header-h:   56px;
+  --header-h:   65px;
   --coordbar-h: 32px;
   --radius:     10px;
   --ui-scale:   .92;
@@ -234,7 +234,7 @@ html, body { height: 100%; font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Ar
 #zOrderDock {
   position: absolute;
   bottom: calc(var(--coordbar-h) + 10px);
-  left: calc(var(--sidebar-w) + 10px);
+  left: calc(var(--sidebar-w) - 360px);
   background: var(--bg-white); border: 1px solid var(--border-light);
   border-radius: var(--radius); box-shadow: var(--shadow-md);
   z-index: 100; min-width: 220px; max-width: 340px; max-height: 230px;

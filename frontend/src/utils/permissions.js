@@ -1,62 +1,71 @@
 // frontend/src/utils/permissions.js
-// Sistema de permisos por rol del geovisor CTGlobal
-// Roles: VIEWER | EDITOR  (definidos en project_users de la intranet)
-
 import { decodeToken } from './token.js';
 
 export const ROLES = {
-  VIEWER: 'VIEWER',
-  EDITOR: 'EDITOR',
+  VIEWER:     'VIEWER',
+  FUNCIONARIO: 'FUNCIONARIO',  // nuevo — técnico / funcionario municipal
+  EDITOR:     'EDITOR',
 };
 
-// ── Tabla de permisos ─────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// TABLA DE PERMISOS
+//
+// VIEWER      → consulta básica del mapa
+// FUNCIONARIO → herramientas técnicas (todo menos gestión de usuarios
+//               y carga de documentos al repositorio)
+// EDITOR      → control total
+// ─────────────────────────────────────────────────────────────
 const PERMISOS = {
+
   VIEWER: [
     'verCapas',
     'buscarPredio',
     'medirDistancia',
     'medirArea',
-    'descargarPDF',
     'verTablaAtributos',
-    'imprimirMapa',
     'identificarFeature',
-    'capturaCoords',
-    'verStreet360',
   ],
+
+  FUNCIONARIO: [
+    'verCapas',
+    'buscarPredio',
+    'medirDistancia',
+    'medirArea',
+    'verTablaAtributos',
+    'identificarFeature',
+    'imprimirMapa',       // Imprimir
+    'capturaCoords',      // Captura de coordenadas
+    'subirArchivos',      // Cargar GeoJSON/KML/Shape al mapa
+  ],
+
   EDITOR: [
     'verCapas',
     'buscarPredio',
     'medirDistancia',
     'medirArea',
-    'descargarPDF',
     'verTablaAtributos',
-    'imprimirMapa',
     'identificarFeature',
+    'imprimirMapa',
     'capturaCoords',
-    'verStreet360',
+    'subirArchivos',      // Cargar GeoJSON/KML/Shape al mapa
+    'subirDocumentos',    // Cargar documentos al repositorio documental
     'editarAtributos',
-    'subirArchivos',
-    'verAdminPanel',   // admin-users.html
+    'verAdminPanel',      // Gestión de usuarios (admin-users.html)
   ],
+
 };
 
-/** Retorna el rol del usuario autenticado */
 export function getRol() {
   const payload = decodeToken();
   return payload?.rol || ROLES.VIEWER;
 }
 
-/** ¿El usuario actual puede usar esta herramienta? */
 export function puedeUsar(herramienta) {
   const rol   = getRol();
   const perms = PERMISOS[rol] || PERMISOS.VIEWER;
   return perms.includes(herramienta);
 }
 
-/**
- * Oculta todos los elementos con data-permiso si el usuario no tiene el permiso.
- * Llamar una vez tras cargar el DOM.
- */
 export function aplicarVisibilidad() {
   document.querySelectorAll('[data-permiso]').forEach(el => {
     if (!puedeUsar(el.dataset.permiso)) {

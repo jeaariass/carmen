@@ -36,9 +36,9 @@ function showError(msg) {
 }
 
 function setLoading(on) {
-  btnLogin.disabled   = on;
-  btnText.textContent = on ? 'Verificando…' : 'Ingresar';
-  btnSpinner.toggleAttribute('hidden', !on);
+  btnLogin.disabled        = on;
+  btnText.textContent      = on ? 'Verificando…' : 'Ingresar al sistema';
+  btnSpinner.style.display = on ? 'inline-block' : 'none';
 }
 
 form.addEventListener('submit', async e => {

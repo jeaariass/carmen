@@ -50,8 +50,9 @@ const countEditor    = document.getElementById('countEditor');
 const countTotal     = document.getElementById('countTotal');
 
 const ROL_CFG = {
-  VIEWER: { color: '#2563eb', bg: '#eff6ff', label: 'VIEWER' },
-  EDITOR: { color: '#7c3aed', bg: '#f5f3ff', label: 'EDITOR' },
+  VIEWER:      { color: '#2563eb', bg: '#eff6ff', label: 'VIEWER' },
+  FUNCIONARIO: { color: '#059669', bg: '#f0fdf4', label: 'FUNCIONARIO' },
+  EDITOR:      { color: '#7c3aed', bg: '#f5f3ff', label: 'EDITOR' },
 };
 
 let allUsers = [];
@@ -95,11 +96,13 @@ function renderTable(list) {
 }
 
 function updateSummary(list) {
-  const viewers = list.filter(u => u.rol === 'VIEWER').length;
-  const editors = list.filter(u => u.rol === 'EDITOR').length;
-  countViewer.textContent = viewers;
-  countEditor.textContent = editors;
-  countTotal.textContent  = list.length;
+  countViewer.textContent  = list.filter(u => u.rol === 'VIEWER').length;
+  countEditor.textContent  = list.filter(u => u.rol === 'EDITOR').length;
+  countTotal.textContent   = list.length;
+  // Mostrar FUNCIONARIO en el chip si existe
+  const countFunc = list.filter(u => u.rol === 'FUNCIONARIO').length;
+  const funcEl = document.getElementById('countFuncionario');
+  if (funcEl) funcEl.textContent = countFunc;
 }
 
 // ── Carga ─────────────────────────────────────────────────────

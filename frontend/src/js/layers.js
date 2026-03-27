@@ -306,8 +306,11 @@ export async function initLayers(ctx) {
   }
 
   // 1) Grupos finales: core + PDFs
-  const PDF_GROUP = getPdfLayerGroup(); // key: 'pdfs'
-  const ALL_GROUPS = [...CORE_GROUPS, PDF_GROUP];
+  const PDF_GROUP = getPdfLayerGroup();
+  const ALL_GROUPS = PDF_GROUP.layers.length > 0
+    ? [...CORE_GROUPS, PDF_GROUP]
+    : [...CORE_GROUPS];
+
 
   // 2) Crear capas y agregarlas al mapa
   const olLayersById = new Map();

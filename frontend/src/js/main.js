@@ -52,7 +52,7 @@ async function bootstrap() {
   await tryInit('imprimirMapa',       'print.js',       'initPrint',            ctx);
   await tryInit('subirArchivos',      'upload.js',      'initUploadModule',     ctx);
   await tryInit('capturaCoords',      'coordpicker.js', 'initCoordinatePicker', ctx);
-  await tryInit('verStreet360',       'street360.js',   'initStreet360',        ctx);
+ 
 
   // Repositorio documental (todos los roles)
   try {
@@ -62,6 +62,13 @@ async function bootstrap() {
     initDocUpload(ctx);
   } catch (e) {
     console.warn('[GeoVisor] docRepo/docUpload:', e.message);
+  }
+  // Encuestas ciudadanas
+  try {
+    const { initSurveys } = await import(/* @vite-ignore */ './encuestas.js');
+    initSurveys(ctx);
+  } catch (e) {
+    console.warn('[GeoVisor] encuestas:', e.message);
   }
 
   console.log('[GeoVisor] Listo ✓ — Carmen de Apicalá');
