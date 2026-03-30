@@ -207,8 +207,7 @@ export function initDocRepo(ctx) {
     if (!viewer) return;
 
     const type = file.type || guessType(file.file);
-    const BACKEND_URL = 'http://localhost:3003'; // en prod: URL pública del backend
-    const url = `${BACKEND_URL}/${String(file.file || '').replace(/^\/+/, '')}`;
+    const url = '/gv-carmen-docs/' + String(file.file || '').replace(/^\/+/, '');
 
     const header = `
       <div class="docrepo-viewer-head">

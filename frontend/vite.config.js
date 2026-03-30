@@ -12,13 +12,22 @@ export default defineConfig(({ mode }) => {
       strictPort: false,
 
       proxy: {
+        '/gv-carmen-docs': {
+          target: 'http://localhost:4003',
+          changeOrigin: true,
+          rewrite: path => path.replace(/^\/gv-carmen-docs/, ''),
+        },
+
+        // API del geovisor
         '/api/gv/carmen': {
-          target: 'http://localhost:4003',   // ← backend Carmen
+          target: 'http://localhost:4003',
           changeOrigin: true,
           rewrite: path => path.replace(/^\/api\/gv\/carmen/, '/api'),
         },
+
+        // Intranet CTGlobal
         '/api/intranet': {
-          target: 'http://localhost:4000',   // ← intranet CTGlobal
+          target: 'http://localhost:4000',
           changeOrigin: true,
           rewrite: path => path.replace(/^\/api\/intranet/, ''),
         },
@@ -26,10 +35,8 @@ export default defineConfig(({ mode }) => {
           target: 'http://200.7.107.14:8080',
           changeOrigin: true,
         },
-        '/docs': {
-          target: 'http://localhost:4003',   // ← archivos estáticos del backend Carmen
-          changeOrigin: true,
-        },
+        
+        
       },
     },
   };
