@@ -1,0 +1,1 @@
+const r=(()=>{try{const e=JSON.parse(localStorage.getItem("ctg_project")||"{}");if(e.geoserver_url)return e.geoserver_url.replace(/^https?:\/\/[^/]+/,"")||"/geoserver"}catch{}return"/geoserver"})();export{r as G};

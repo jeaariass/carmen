@@ -19,7 +19,6 @@ async function bootstrap() {
   aplicarVisibilidad();
   bindLogout();
 
-  // Inicial del nombre en el avatar
   const user = getUser();
   if (user?.nombre) {
     const el = document.getElementById('userInitials');
@@ -29,47 +28,68 @@ async function bootstrap() {
   const mapEl = document.getElementById('map');
   const ctx   = { eventBus: new EventBus(), mapEl, root: document };
 
-  // Mapa base + capas
-  const { initMap }    = await import(/* @vite-ignore */ './map.js');
+  const { initMap }    = await import('./map.js');
   await initMap(ctx);
-  const { initLayers } = await import(/* @vite-ignore */ './layers.js');
+
+  const { initLayers } = await import('./layers.js');
   await initLayers(ctx);
 
-  // Herramientas condicionales por permiso
-  async function tryInit(permiso, file, fn, ...args) {
-    if (!puedeUsar(permiso)) return;
+  // ── Herramientas condicionales ────────────────────────────
+  if (puedeUsar('identificarFeature')) {
     try {
-      const mod = await import(/* @vite-ignore */ `./${file}`);
-      await mod[fn](...args);
-    } catch (e) {
-      console.warn(`[GeoVisor] ${file}: ${e.message}`);
-    }
+      const { initIdentify } = await import('./identify.js');
+      await initIdentify(ctx);
+    } catch (e) { console.warn('[GeoVisor] identify:', e.message); }
   }
 
-  await tryInit('identificarFeature', 'identify.js',    'initIdentify',         ctx);
-  await tryInit('medirArea',          'measure.js',     'initMeasure',          ctx);
-  await tryInit('verTablaAtributos',  'layerQuery.js',  'initLayerQueryUI',     ctx.map);
-  await tryInit('imprimirMapa',       'print.js',       'initPrint',            ctx);
-  await tryInit('subirArchivos',      'upload.js',      'initUploadModule',     ctx);
-  await tryInit('capturaCoords',      'coordpicker.js', 'initCoordinatePicker', ctx);
- 
+  if (puedeUsar('medirArea')) {
+    try {
+      const { initMeasure } = await import('./measure.js');
+      await initMeasure(ctx);
+    } catch (e) { console.warn('[GeoVisor] measure:', e.message); }
+  }
 
-  // Repositorio documental (todos los roles)
+  if (puedeUsar('verTablaAtributos')) {
+    try {
+      const { initLayerQueryUI } = await import('./layerQuery.js');
+      await initLayerQueryUI(ctx.map);
+    } catch (e) { console.warn('[GeoVisor] layerQuery:', e.message); }
+  }
+
+  if (puedeUsar('imprimirMapa')) {
+    try {
+      const { initPrint } = await import('./print.js');
+      await initPrint(ctx);
+    } catch (e) { console.warn('[GeoVisor] print:', e.message); }
+  }
+
+  if (puedeUsar('subirArchivos')) {
+    try {
+      const { initUploadModule } = await import('./upload.js');
+      await initUploadModule(ctx);
+    } catch (e) { console.warn('[GeoVisor] upload:', e.message); }
+  }
+
+  if (puedeUsar('capturaCoords')) {
+    try {
+      const { initCoordinatePicker } = await import('./coordpicker.js');
+      await initCoordinatePicker(ctx);
+    } catch (e) { console.warn('[GeoVisor] coordpicker:', e.message); }
+  }
+
+  // ── Repositorio documental ────────────────────────────────
   try {
-    const { initDocRepo }    = await import(/* @vite-ignore */ './docRepo.js');
-    const { initDocUpload }  = await import(/* @vite-ignore */ './docUpload.js');
+    const { initDocRepo }   = await import('./docRepo.js');
+    const { initDocUpload } = await import('./docUpload.js');
     initDocRepo(ctx);
     initDocUpload(ctx);
-  } catch (e) {
-    console.warn('[GeoVisor] docRepo/docUpload:', e.message);
-  }
-  // Encuestas ciudadanas
+  } catch (e) { console.warn('[GeoVisor] docRepo/docUpload:', e.message); }
+
+  // ── Encuestas ─────────────────────────────────────────────
   try {
-    const { initSurveys } = await import(/* @vite-ignore */ './encuestas.js');
+    const { initSurveys } = await import('./encuestas.js');
     initSurveys(ctx);
-  } catch (e) {
-    console.warn('[GeoVisor] encuestas:', e.message);
-  }
+  } catch (e) { console.warn('[GeoVisor] encuestas:', e.message); }
 
   console.log('[GeoVisor] Listo ✓ — Carmen de Apicalá');
 }

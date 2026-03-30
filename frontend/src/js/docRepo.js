@@ -24,7 +24,7 @@ export function initDocRepo(ctx) {
   const layerFilter = overlay.querySelector('#docRepoLayerFilter');
   const recentList = overlay.querySelector('#docRepoRecents');
 
-  const MANIFEST_URL = '/api/gv/carmen/docs/manifest';
+  const MANIFEST_URL = (import.meta.env.VITE_API_URL || '/api/gv/carmen') + '/docs/manifest';
   const LS_RECENTS_KEY = 'docRepo_recents_v1';
   const MAX_RECENTS = 15;
 
